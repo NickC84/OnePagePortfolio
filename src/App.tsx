@@ -249,9 +249,6 @@ export default function App() {
             <a className="hover:text-slate-900" href="#works">
               作品
             </a>
-            <a className="hover:text-slate-900" href="#architecture">
-              架構
-            </a>
             <a className="hover:text-slate-900" href="#stack">
               技術棧
             </a>
