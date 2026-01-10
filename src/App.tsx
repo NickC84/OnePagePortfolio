@@ -362,43 +362,6 @@ export default function App() {
           </div>
         </Section>
 
-        {/* Architecture */}
-        <Section
-          id="architecture"
-          title="系統架構（概念圖）"
-        >
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 font-mono text-sm leading-7 text-slate-700">
-                <div>［診所端設備 / 系統］</div>
-                <div>        │</div>
-                <div>        ▼</div>
-                <div>［本地 Bridge（監聽/簽章/重試）］</div>
-                <div>        │</div>
-                <div>        ▼</div>
-                <div>［Cloud API / DB / Storage］</div>
-                <div>        │</div>
-                <div>   ┌────┴─────────┐</div>
-                <div>   ▼              ▼</div>
-                <div>［Web 後台］     ［WebSocket 推播］</div>
-                <div>                    │</div>
-                <div>                    ▼</div>
-                <div>              ［Android TV 裝置群］</div>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-semibold">架構重點</h4>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-slate-700">
-                  <li>院所端不穩定環境：需要 debounce、retry、斷線恢復</li>
-                  <li>雲端端到端：API、DB、物件儲存、推播</li>
-                  <li>終端裝置：離線播放、快取、長時間穩定運作、可監控</li>
-                  <li>可維運：Sentry 監控、記錄、診斷與版本管理</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </Section>
-
         {/* Tech Stack */}
         <Section id="stack" title="技術棧">
           <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
