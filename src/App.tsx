@@ -29,10 +29,7 @@ const works: Work[] = [
       { label: "核心價值", value: "穩定播放 + 可維運" },
       { label: "關鍵能力", value: "離線快取 / 防卡死 / 監控" },
     ],
-    links: [
-      // { label: "Demo / 影片（可填）", href: "#" },
-      // { label: "截圖集（可填）", href: "#" },
-    ],
+    links: [],
     images: ["/images/home.png", "/images/googlePage.png"],
   },
   {
@@ -53,7 +50,7 @@ const works: Work[] = [
       { label: "資料流", value: "設備/檔案 → Bridge → Cloud → TV/後台" },
     ],
     links: [],
-    // image: "/images/work2.png",
+    images: [],
   },
 ];
 
@@ -80,9 +77,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="mx-auto max-w-5xl px-6 py-14">
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+    <section
+      id={id}
+      className="mx-auto w-full max-w-5xl px-3 py-8 sm:px-6 sm:py-12"
+    >
+      <div className="mb-5 sm:mb-8">
+        <h2 className="text-lg font-semibold tracking-tight sm:text-2xl">
+          {title}
+        </h2>
         {subtitle ? <p className="mt-2 text-slate-600">{subtitle}</p> : null}
       </div>
       {children}
@@ -92,8 +94,8 @@ function Section({
 
 function Chip({ text }: { text: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700">
-      {text}
+    <span className="inline-flex max-w-full items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] leading-4 text-slate-700 sm:px-3 sm:text-sm">
+      <span className="max-w-full break-words">{text}</span>
     </span>
   );
 }
@@ -104,7 +106,6 @@ function ImageStrip({ images, title }: { images: string[]; title: string }) {
   const startXRef = React.useRef(0);
   const scrollLeftRef = React.useRef(0);
 
-  // 滑鼠拖曳（桌機很好用）
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -112,38 +113,32 @@ function ImageStrip({ images, title }: { images: string[]; title: string }) {
     startXRef.current = e.pageX - el.offsetLeft;
     scrollLeftRef.current = el.scrollLeft;
   };
-
-  const onMouseLeave = () => {
-    isDownRef.current = false;
-  };
-
-  const onMouseUp = () => {
-    isDownRef.current = false;
-  };
-
+  const onMouseLeave = () => (isDownRef.current = false);
+  const onMouseUp = () => (isDownRef.current = false);
   const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = scrollerRef.current;
     if (!el || !isDownRef.current) return;
     e.preventDefault();
     const x = e.pageX - el.offsetLeft;
-    const walk = (x - startXRef.current) * 1.2; // 拖曳速度係數
+    const walk = (x - startXRef.current) * 1.2;
     el.scrollLeft = scrollLeftRef.current - walk;
   };
 
-  // 箭頭按鈕：一次滑一張（依卡片寬估算）
   const scrollByCard = (dir: -1 | 1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const cardWidth = 320; // 對應下面卡片寬 (w-80 = 20rem = 320px)
-    el.scrollBy({ left: dir * (cardWidth + 16), behavior: "smooth" }); // + gap
+    const cardWidth = window.matchMedia("(min-width: 640px)").matches ? 280 : 220;
+    el.scrollBy({ left: dir * (cardWidth + 16), behavior: "smooth" });
   };
+
+  if (!images?.length) return null;
 
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-medium text-slate-700">作品截圖</div>
 
-        <div className="flex gap-2">
+        <div className="hidden gap-2 sm:flex">
           <button
             type="button"
             onClick={() => scrollByCard(-1)}
@@ -166,10 +161,13 @@ function ImageStrip({ images, title }: { images: string[]; title: string }) {
       <div
         ref={scrollerRef}
         className={[
-          "mt-3 flex gap-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-4",
-          "scroll-smooth",
-          "snap-x snap-mandatory",
+          "mt-3 flex gap-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-3 sm:p-4",
+          "scroll-smooth snap-x snap-mandatory",
+          "touch-pan-x",
           "cursor-grab active:cursor-grabbing",
+          "hide-scrollbar",
+          "[scrollbar-width:none]",
+          "[-ms-overflow-style:none]",
         ].join(" ")}
         onMouseDown={onMouseDown}
         onMouseLeave={onMouseLeave}
@@ -181,8 +179,7 @@ function ImageStrip({ images, title }: { images: string[]; title: string }) {
         {images.map((src, i) => (
           <div
             key={`${src}-${i}`}
-            className="snap-start shrink-0"
-            style={{ width: 320 }} // 中型卡片寬
+            className="snap-start shrink-0 w-[220px] sm:w-[280px] md:w-[320px]"
           >
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
               <div className="aspect-video w-full bg-slate-100">
@@ -197,6 +194,12 @@ function ImageStrip({ images, title }: { images: string[]; title: string }) {
             </div>
           </div>
         ))}
+
+        <div className="shrink-0" style={{ width: 1 }} />
+      </div>
+
+      <div className="mt-2 text-xs text-slate-500 sm:hidden">
+        小提示：可左右滑動查看截圖
       </div>
     </div>
   );
@@ -206,29 +209,21 @@ function BackToTopButton() {
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
-    const onScroll = () => {
-      // 滑超過 400px 才顯示
-      setVisible(window.scrollY > 400);
-    };
-
+    const onScroll = () => setVisible(window.scrollY > 320);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     <button
       type="button"
-      onClick={scrollToTop}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="回到最上方"
       className={[
-        "fixed bottom-6 right-6 z-50",
-        "rounded-full border border-slate-200 bg-white p-3 shadow-lg",
-        "hover:bg-slate-50 transition-all",
-        "text-slate-700",
+        "fixed bottom-4 right-4 z-50",
+        "rounded-full border border-slate-200 bg-white px-3 py-2 text-sm shadow-lg",
+        "sm:bottom-6 sm:right-6 sm:px-4 sm:py-3",
+        "hover:bg-slate-50 transition-all text-slate-700",
         visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
       ].join(" ")}
     >
@@ -237,65 +232,116 @@ function BackToTopButton() {
   );
 }
 
+function MobileNav() {
+  const [open, setOpen] = React.useState(false);
+  const close = () => setOpen(false);
+
+  return (
+    <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+        <a href="#top" className="font-semibold tracking-tight">
+          Nick 作品集
+        </a>
+
+        <nav className="hidden gap-5 text-sm text-slate-600 sm:flex">
+          <a className="hover:text-slate-900" href="#works">
+            作品
+          </a>
+          <a className="hover:text-slate-900" href="#stack">
+            技術棧
+          </a>
+          <a className="hover:text-slate-900" href="#contact">
+            聯絡
+          </a>
+        </nav>
+
+        <button
+          type="button"
+          className="sm:hidden rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="開啟選單"
+          aria-expanded={open}
+        >
+          ☰
+        </button>
+      </div>
+
+      {open ? (
+        <div className="sm:hidden border-t border-slate-200 bg-white">
+          <div className="mx-auto flex w-full max-w-5xl flex-col px-3 py-3 text-sm text-slate-700">
+            <a
+              className="rounded-lg px-3 py-2 hover:bg-slate-50"
+              href="#works"
+              onClick={close}
+            >
+              作品
+            </a>
+            <a
+              className="rounded-lg px-3 py-2 hover:bg-slate-50"
+              href="#stack"
+              onClick={close}
+            >
+              技術棧
+            </a>
+            <a
+              className="rounded-lg px-3 py-2 hover:bg-slate-50"
+              href="#contact"
+              onClick={close}
+            >
+              聯絡
+            </a>
+          </div>
+        </div>
+      ) : null}
+    </header>
+  );
+}
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Top Nav */}
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="font-semibold tracking-tight">Nick 作品集</div>
-          <nav className="flex gap-5 text-sm text-slate-600">
-            <a className="hover:text-slate-900" href="#works">
-              作品
-            </a>
-            <a className="hover:text-slate-900" href="#stack">
-              技術棧
-            </a>
-            <a className="hover:text-slate-900" href="#contact">
-              聯絡
-            </a>
-          </nav>
-        </div>
-      </header>
+    <div id="top" className="min-h-screen bg-slate-50 text-slate-900">
+      <MobileNav />
 
-      {/* Hero */}
-      <main>
-        <section className="mx-auto max-w-5xl px-6 pb-10 pt-16">
-          <div className="rounded-2xl border border-slate-200 bg-white p-10 shadow-sm">
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight">
+      <main className="min-w-0">
+        {/* Hero */}
+        <section className="mx-auto w-full max-w-5xl px-3 pb-7 pt-8 sm:px-6 sm:pb-10 sm:pt-16">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-10">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:mt-3 sm:text-4xl">
               專案展示
             </h1>
-            <p className="mt-4 max-w-2xl text-slate-600">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:text-base">
               我是 Nick，專注於商用播放系統與系統整合的軟體工程師，具備多年企業系統與實際商用部署經驗，
               涵蓋影音串流、醫療系統、ERP/WMS 與現場設備整合。主力開發 Android TV 公播與診所叫號系統，
               專注於長時間穩定運作、離線容錯與可維運架構設計。
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
               <a
                 href="#works"
-                className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:bg-slate-800"
+                className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 sm:px-5 sm:py-3"
               >
                 查看作品
               </a>
               <a
                 href="#contact"
-                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 sm:px-5 sm:py-3"
               >
                 聯絡我
               </a>
             </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
               {[
                 { k: "定位", v: "系統整合型工程" },
                 { k: "強項", v: "24/7 播放穩定性與維運、可維運架構設計、跨平台整合" },
-                { k: "場景", v: "診所、公播、數位看板、現場設備整合、app整合" },
+                { k: "場景", v: "診所、公播、數位看板、現場設備整合、App 整合" },
               ].map((it) => (
-                <div key={it.k} className="rounded-xl border border-slate-200 p-4">
+                <div
+                  key={it.k}
+                  className="min-w-0 rounded-xl border border-slate-200 p-3 sm:p-4"
+                >
                   <div className="text-xs font-medium text-slate-500">{it.k}</div>
-                  <div className="mt-1 font-semibold">{it.v}</div>
+                  <div className="mt-1 break-words font-semibold">{it.v}</div>
                 </div>
               ))}
             </div>
@@ -303,54 +349,60 @@ export default function App() {
         </section>
 
         {/* Works */}
-        <Section
-          id="works"
-          title="作品"
-        >
-          <div className="grid gap-6">
+        <Section id="works" title="作品">
+          <div className="grid gap-5 sm:gap-6">
             {works.map((w) => (
-              <article key={w.title} className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                  <div className="md:max-w-3xl">
-                    <h3 className="text-xl font-semibold">{w.title}</h3>
-                    <p className="mt-2 text-slate-600">{w.subtitle}</p>
+              <article
+                key={w.title}
+                className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 md:p-8"
+              >
+                <div className="flex min-w-0 flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                  <div className="min-w-0 md:max-w-3xl">
+                    <h3 className="text-base font-semibold sm:text-xl">{w.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 sm:text-base">
+                      {w.subtitle}
+                    </p>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex min-w-0 flex-wrap gap-2">
                       {w.tags.map((t) => (
                         <Chip key={t} text={t} />
                       ))}
                     </div>
 
-                    <ul className="mt-5 list-disc space-y-2 pl-5 text-slate-700">
+                    <ul className="mt-5 list-disc space-y-2 pl-5 text-sm text-slate-700 sm:text-base">
                       {w.bullets.map((b) => (
-                        <li key={b}>{b}</li>
+                        <li key={b} className="break-words">
+                          {b}
+                        </li>
                       ))}
                     </ul>
 
-                    <div className="mt-6 flex flex-wrap gap-3 text-sm">
-                      {w.links.map((l) => (
-                        <a
-                          key={l.label}
-                          href={l.href}
-                          className="rounded-xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50"
-                        >
-                          {l.label}
-                        </a>
-                      ))}
-                    </div>
+                    {w.links.length ? (
+                      <div className="mt-6 flex flex-wrap gap-3 text-sm">
+                        {w.links.map((l) => (
+                          <a
+                            key={l.label}
+                            href={l.href}
+                            className="rounded-xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50"
+                          >
+                            {l.label}
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-
-                  {/* Optional image placeholder */}
                 </div>
 
-                {w.images?.length ? <ImageStrip images={w.images} title={w.title} /> : null}
+                <ImageStrip images={w.images ?? []} title={w.title} />
 
-
-                <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                <div className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
                   {w.highlights.map((h) => (
-                    <div key={h.label} className="rounded-xl border border-slate-200 p-4">
+                    <div
+                      key={h.label}
+                      className="min-w-0 rounded-xl border border-slate-200 p-3 sm:p-4"
+                    >
                       <div className="text-xs font-medium text-slate-500">{h.label}</div>
-                      <div className="mt-1 font-semibold">{h.value}</div>
+                      <div className="mt-1 break-words font-semibold">{h.value}</div>
                     </div>
                   ))}
                 </div>
@@ -361,7 +413,7 @@ export default function App() {
 
         {/* Tech Stack */}
         <Section id="stack" title="技術棧">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
             <div className="flex flex-wrap gap-2">
               {techStack.map((t) => (
                 <Chip key={t} text={t} />
@@ -371,24 +423,31 @@ export default function App() {
         </Section>
 
         {/* Contact */}
-        <Section
-          id="contact"
-          title="聯絡"
-        >
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <Section id="contact" title="聯絡">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
             <div className="grid gap-4 md:grid-cols-2">
-              <div>
+              <div className="min-w-0">
                 <div className="text-sm font-medium text-slate-600">姓名</div>
-                <div className="mt-1 text-xl font-semibold">Nick Chen</div>
-                <p className="mt-3 text-slate-600">
+                <div className="mt-1 text-lg font-semibold sm:text-xl">Nick Chen</div>
+                <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
                   專注於商用 Android TV 播放系統、診所叫號系統與端到端系統整合解決方案，涵蓋從概念驗證（PoC）、
-                  系統架構設計、現場導入到長期維運與功能擴充，協助客戶將構想落地為可長期穩定運作的商用系統。                </p>
+                  系統架構設計、現場導入到長期維運與功能擴充，協助客戶將構想落地為可長期穩定運作的商用系統。
+                </p>
               </div>
-              <div className="flex flex-col gap-3 text-sm">
-                <a className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50" href="mailto:nn840928@gmail.com">
+
+              <div className="flex min-w-0 flex-col gap-3 text-sm">
+                <a
+                  className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
+                  href="mailto:nn840928@gmail.com"
+                >
                   Email：nn840928@gmail.com
                 </a>
-                <a className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50" href="https://line.me/ti/p/VV3h7YjKu4" target="_blank" rel="noreferrer">
+                <a
+                  className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
+                  href="https://line.me/ti/p/VV3h7YjKu4"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Line：@nick8409
                 </a>
               </div>
@@ -397,12 +456,13 @@ export default function App() {
         </Section>
 
         <footer className="border-t border-slate-200 bg-white py-8">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-6 text-sm text-slate-500">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>© {new Date().getFullYear()} Nick Chen</div>
             <div>Built with React · Hosted on Netlify</div>
           </div>
         </footer>
       </main>
+
       <BackToTopButton />
     </div>
   );

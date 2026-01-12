@@ -1,1 +1,38 @@
 @import "tailwindcss";
+
+/* 重要：不要讓 Vite 範本用 flex 置中整個 #root */
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+    /* ← 關鍵：不要 flex */
+    overflow-x: hidden;
+    /* 可留著，避免水平捲動 */
+}
+
+/* 重要：#root 一定要撐滿 */
+#root {
+    min-height: 100%;
+    width: 100%;
+}
+
+/* 讓所有元素計算寬度更穩定，避免 1~2px 溢出 */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* 圖片永遠不要撐爆容器 */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 隱藏水平捲軸（Chrome/Safari） */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
